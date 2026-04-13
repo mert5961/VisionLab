@@ -56,7 +56,7 @@ npm run lint
 
 This project is configured for GitHub Pages with a GitHub Actions workflow.
 
-- Production URL: `https://mert5961.github.io/VisionLab/`
+- Production URL: [VisionLab on GitHub Pages](https://mert5961.github.io/VisionLab/)
 - Vite base path: `/VisionLab/`
 - Workflow file: `.github/workflows/deploy-pages.yml`
 
