@@ -52,6 +52,18 @@ npm run build
 npm run lint
 ```
 
+## Deployment
+
+This project is configured for GitHub Pages with a GitHub Actions workflow.
+
+- Production URL: `https://mert5961.github.io/VisionLab/`
+- Vite base path: `/VisionLab/`
+- Workflow file: `.github/workflows/deploy-pages.yml`
+
+After pushing to `main`, GitHub Actions will build the app and deploy the `dist` output to Pages.
+
+In the repository settings, make sure GitHub Pages is set to use `GitHub Actions` as the source if it is not already.
+
 ## Project Structure
 
 ```text
