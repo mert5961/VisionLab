@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
+import { readCompletedLevels, saveCompletedLevels } from './game/progress'
 import { PipelineCodeEditor } from './components/PipelineCodeEditor'
 import { RelatedLessonCard } from './components/RelatedLessonCard'
 import { SignalScreen } from './components/SignalScreen'
@@ -60,7 +61,9 @@ function App() {
   const module = findShapeModule
   const levels = module.levels
   const [currentLevelIndex, setCurrentLevelIndex] = useState(0)
-  const [completedLevelIds, setCompletedLevelIds] = useState<string[]>([])
+  const [completedLevelIds, setCompletedLevelIds] = useState<string[]>(() =>
+    readCompletedLevels(levels.map((level) => level.id)),
+  )
   const [screenMode, setScreenMode] = useState<ScreenMode>('mission')
   const [analysisOpen, setAnalysisOpen] = useState(false)
   const [screenFx, setScreenFx] = useState('')
@@ -88,18 +91,27 @@ function App() {
   const visualRef = useRef<HTMLElement | null>(null)
   const pipelineRef = useRef<HTMLDivElement | null>(null)
 
-  const { analysis, isPending: isReprocessing } = useFindShapeAnalysis({
+  const { analysis, isPending: isReprocessing, error: analysisError } = useFindShapeAnalysis({
     scene,
     program,
     initialAnalysis,
   })
   const resolvedCompletedLevelIds = useMemo(
     () =>
-      analysis.success && !completedLevelIds.includes(currentLevel.id)
+      !isReprocessing && !analysisError && analysis.success && !completedLevelIds.includes(currentLevel.id)
         ? [...completedLevelIds, currentLevel.id]
         : completedLevelIds,
-    [analysis.success, completedLevelIds, currentLevel.id],
+    [analysis.success, analysisError, isReprocessing, completedLevelIds, currentLevel.id],
   )
+
+  // Keep earned progress even when the player later edits or restores the pipeline.
+  if (resolvedCompletedLevelIds !== completedLevelIds) {
+    setCompletedLevelIds(resolvedCompletedLevelIds)
+  }
+
+  useEffect(() => {
+    saveCompletedLevels(completedLevelIds)
+  }, [completedLevelIds])
 
   const playableMissionSets = useMemo(
     () => getPlayableMissionSetsForModule('find-shape'),
@@ -184,11 +196,12 @@ function App() {
   )
 
   const gameplayQa = useMemo(
-    () => evaluateFindShapeLevelQa({ level: currentLevel, module }),
-    [currentLevel, module],
+    () => debugMode ? evaluateFindShapeLevelQa({ level: currentLevel, module }) : null,
+    [currentLevel, module, debugMode],
   )
 
   const uiQa = useUiQa({
+    enabled: debugMode,
     shellRef,
     missionRef: operatorTopRef,
     visualRef,
@@ -241,21 +254,7 @@ function App() {
     setScreenFx(fx)
   }
 
-  const persistCurrentLevelCompletion = () => {
-    if (!analysis.success) {
-      return
-    }
-
-    setCompletedLevelIds((currentCompletedLevelIds) =>
-      currentCompletedLevelIds.includes(currentLevel.id)
-        ? currentCompletedLevelIds
-        : [...currentCompletedLevelIds, currentLevel.id],
-    )
-  }
-
   const enterOperator = () => {
-    persistCurrentLevelCompletion()
-
     if (focusedLevel.id !== currentLevel.id) {
       const nextScene = module.createScene(focusedLevel.sceneSeed, focusedLevel.sceneOptions)
       const nextProgram = createFindShapeProgramCopy(focusedLevel.initialProgram)
@@ -285,8 +284,6 @@ function App() {
       return
     }
 
-    persistCurrentLevelCompletion()
-
     const level = levels[nextIndex]
     const nextProgram = createFindShapeProgramCopy(level.initialProgram)
     const nextScene = module.createScene(level.sceneSeed, level.sceneOptions)
@@ -295,6 +292,8 @@ function App() {
     setSeed(level.sceneSeed)
     setScene(nextScene)
     setInitialAnalysis(module.analyze(nextScene, nextProgram))
+    setScreenMode('operator')
+    setAnalysisOpen(false)
   }
 
   const moveStep = (stepId: string, direction: -1 | 1) => {
@@ -476,14 +475,16 @@ function App() {
                 {currentLevel.title} / {scene.targetCode}
               </span>
             </div>
-            <p className="operator-bar__feedback">{analysis.nextAction}</p>
+            <p className="operator-bar__feedback" role="status">{analysisError ?? analysis.nextAction}</p>
             <div className="operator-bar__actions">
               <span className={`operator-bar__state operator-bar__state--${analysis.systemState}`}>
-                {isReprocessing ? 'updating' : analysis.systemState}
+                {isReprocessing ? 'updating' : analysisError ? 'error' : analysis.systemState}
               </span>
               <button
                 type="button"
                 className="operator-bar__button"
+                aria-expanded={analysisOpen}
+                aria-controls="analysis-sheet"
                 onClick={() => setAnalysisOpen((current) => !current)}
               >
                 {analysisOpen ? 'Close Analysis' : 'Analysis'}
@@ -549,7 +550,13 @@ function App() {
             </div>
           </section>
 
-          <aside className={`analysis-sheet ${analysisOpen ? 'analysis-sheet--open' : ''}`}>
+          <aside
+            id="analysis-sheet"
+            aria-label="Diagnostics"
+            inert={!analysisOpen}
+            aria-hidden={!analysisOpen}
+            className={`analysis-sheet ${analysisOpen ? 'analysis-sheet--open' : ''}`}
+          >
             <div className="analysis-sheet__header">
               <div>
                 <p className="analysis-sheet__eyebrow">Analysis</p>
@@ -587,7 +594,7 @@ function App() {
                 </section>
               ) : null}
 
-              {debugMode ? (
+              {debugMode && gameplayQa ? (
                 <section className="analysis-card">
                   <p className="analysis-card__label">QA</p>
                   <p className="analysis-card__line">{gameplayQa.debugSummary}</p>
@@ -597,7 +604,7 @@ function App() {
                     </p>
                   ))}
                   <p className="analysis-card__line analysis-card__line--muted">
-                    UI issues: {uiQa.checks.length}
+                    UI issues: {uiQa.checks.filter((check) => !check.passed).length}
                   </p>
                 </section>
               ) : null}

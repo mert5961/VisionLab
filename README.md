@@ -25,13 +25,13 @@ The current experience focuses on a "Find the Shape" chapter: players move betwe
 
 ### Prerequisites
 
-- Node.js 20+ recommended
+- Node.js 24.15+ recommended (also supports 22.22.2+ or 26+)
 - npm
 
 ### Install
 
 ```bash
-npm install
+npm ci
 ```
 
 ### Start the dev server
@@ -52,6 +52,28 @@ npm run build
 npm run lint
 ```
 
+### Run all checks
+
+```bash
+npm run check
+```
+
+This runs lint, regression tests, and a production build. `npm test` runs tests alone.
+Tests use a Skia canvas renderer to exercise real image pixels, including each of
+the 12 levels at its original seed and two rescan seeds. Hook and UI tests cover
+worker failures, stale replies, mission selection, and saved progress.
+
+## Progress and diagnostics
+
+The mission sequence begins with Raw Feed and unlocks all 12 implemented levels.
+Completed levels are saved automatically in this browser, including when you
+restore a solved pipeline. Pipeline edits and the current scan are session-only.
+If browser storage is blocked or full, the game continues with session progress.
+
+Add `?debug=1` to enable gameplay and layout diagnostics. These checks are skipped
+in normal play. If a Web Worker fails or does not respond within 10 seconds,
+analysis falls back to the main thread so the editor can keep working.
+
 ## Deployment
 
 This project is configured for GitHub Pages with a GitHub Actions workflow.
@@ -60,7 +82,9 @@ This project is configured for GitHub Pages with a GitHub Actions workflow.
 - Vite base path: `/VisionLab/`
 - Workflow file: `.github/workflows/deploy-pages.yml`
 
-After pushing to `main`, GitHub Actions will build the app and deploy the `dist` output to Pages.
+Pull requests and feature branches run lint, tests, and the production build.
+After pushing to `main`, GitHub Actions runs the same checks before deploying the
+`dist` output to Pages. CI uses Node.js 24.
 
 In the repository settings, make sure GitHub Pages is set to use `GitHub Actions` as the source if it is not already.
 

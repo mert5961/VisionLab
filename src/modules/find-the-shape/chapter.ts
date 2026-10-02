@@ -90,6 +90,7 @@ export const findShapeChapter = {
       lessonNudgeMessage:
         'This mission is about turning raw pixels into a usable signal. If the stack still feels abstract, use the lecture as a quick reset on why preprocessing matters.',
       sceneSeed: 991,
+      sceneOptions: { variant: 'false-target' },
       initialProgram: createProgram([
         step('step-input', 'frame', [], 'input_image', ['input_image'], true),
         step(
@@ -104,14 +105,14 @@ export const findShapeChapter = {
           radius: 2,
         }),
         step('step-mask', 'mask', ['blurred'], 'binary_threshold', ['binary_threshold'], true, {
-          level: 166,
+          level: 130,
         }),
         step('step-edges', 'edges', ['blurred'], 'canny_edges', ['canny_edges'], true, {
           sensitivity: 118,
         }),
         step('step-contours', 'contours', ['mask'], 'find_contours', ['find_contours'], true),
-        step('step-target', 'target', ['contours', 'edges'], 'best_contour', [
-          'best_contour',
+        step('step-target', 'target', ['contours', 'edges'], 'largest_contour', [
+          'largest_contour',
         ], true),
       ]),
       solutionProgram: createProgram([
@@ -128,14 +129,14 @@ export const findShapeChapter = {
           radius: 2,
         }),
         step('step-mask', 'mask', ['blurred'], 'binary_threshold', ['binary_threshold'], true, {
-          level: 166,
+          level: 130,
         }),
         step('step-edges', 'edges', ['blurred'], 'canny_edges', ['canny_edges'], true, {
           sensitivity: 118,
         }),
         step('step-contours', 'contours', ['mask'], 'find_contours', ['find_contours'], true),
-        step('step-target', 'target', ['contours', 'edges'], 'best_contour', [
-          'best_contour',
+        step('step-target', 'target', ['contours', 'edges'], 'largest_contour', [
+          'largest_contour',
         ], true),
       ]),
       relatedLesson: lessonIntro,
@@ -192,11 +193,11 @@ export const findShapeChapter = {
           'step-mask',
           'mask',
           ['blurred'],
-          'adaptive_cutoff',
+          'binary_threshold',
           ['binary_threshold', 'high_pass_mask', 'adaptive_cutoff'],
           false,
           {
-            level: 156,
+            level: 166,
           },
         ),
         step('step-edges', 'edges', ['blurred'], 'canny_edges', ['canny_edges'], true, {
@@ -366,15 +367,15 @@ export const findShapeChapter = {
           ['binary_threshold', 'adaptive_cutoff'],
           false,
           {
-            level: 132,
+            level: 100,
           },
         ),
         step('step-edges', 'edges', ['blurred'], 'canny_edges', ['canny_edges'], true, {
           sensitivity: 118,
         }),
         step('step-contours', 'contours', ['mask'], 'find_contours', ['find_contours'], true),
-        step('step-target', 'target', ['contours', 'edges'], 'best_contour', [
-          'best_contour',
+        step('step-target', 'target', ['contours', 'edges'], 'largest_contour', [
+          'largest_contour',
         ], true),
       ]),
       solutionProgram: createProgram([
@@ -398,8 +399,8 @@ export const findShapeChapter = {
           sensitivity: 118,
         }),
         step('step-contours', 'contours', ['mask'], 'find_contours', ['find_contours'], true),
-        step('step-target', 'target', ['contours', 'edges'], 'best_contour', [
-          'best_contour',
+        step('step-target', 'target', ['contours', 'edges'], 'largest_contour', [
+          'largest_contour',
         ], true),
       ]),
       relatedLesson: lessonLinear,
@@ -460,11 +461,11 @@ export const findShapeChapter = {
           'step-mask',
           'mask',
           ['blurred'],
-          'adaptive_cutoff',
+          'binary_threshold',
           ['binary_threshold', 'high_pass_mask', 'adaptive_cutoff'],
           false,
           {
-            level: 156,
+            level: 166,
           },
         ),
         step('step-edges', 'edges', ['blurred'], 'canny_edges', ['canny_edges'], true, {
