@@ -3,6 +3,7 @@ import type { RefObject } from 'react'
 import type { UiQaReport } from './types'
 
 interface UseUiQaArgs {
+  enabled: boolean
   shellRef: RefObject<HTMLElement | null>
   missionRef: RefObject<HTMLElement | null>
   visualRef: RefObject<HTMLElement | null>
@@ -16,6 +17,7 @@ const EMPTY_REPORT: UiQaReport = {
 }
 
 export function useUiQa({
+  enabled,
   shellRef,
   missionRef,
   visualRef,
@@ -25,6 +27,8 @@ export function useUiQa({
   const [report, setReport] = useState<UiQaReport>(EMPTY_REPORT)
 
   useEffect(() => {
+    if (!enabled) return
+
     const frameId = window.requestAnimationFrame(() => {
       const shell = shellRef.current
       const mission = missionRef.current
@@ -99,7 +103,7 @@ export function useUiQa({
     return () => {
       window.cancelAnimationFrame(frameId)
     }
-  }, [missionRef, pipelineRef, shellRef, visualRef, watchKey])
+  }, [enabled, missionRef, pipelineRef, shellRef, visualRef, watchKey])
 
   return report
 }

@@ -113,6 +113,7 @@ export const visionLabChapters: VisionLabChapter[] = [
 export const visionLabMissionSets: VisionLabMissionSet[] = [
   {
     id: 'what-is-seeing',
+    moduleId: 'find-shape',
     chapterId: 'seeing-the-signal',
     title: 'What is Seeing?',
     concept: 'Raw pixels become usable signal only after preprocessing.',
@@ -158,6 +159,7 @@ export const visionLabMissionSets: VisionLabMissionSet[] = [
   },
   {
     id: 'separating-signal-from-noise',
+    moduleId: 'find-shape',
     chapterId: 'seeing-the-signal',
     title: 'Separating Signal from Noise',
     concept: 'The machine learns which pixels belong to target versus background.',

@@ -180,6 +180,14 @@ export function runFindShapePipeline(
           bestContour.sizeScore >= 0.7
     )
 
+  if (success && targetStep) {
+    const targetReport = lineReports.find((report) => report.stepId === targetStep.id)
+    if (targetReport) {
+      targetReport.state = 'success'
+      targetReport.message = 'Target contour isolated successfully.'
+    }
+  }
+
   const confidence = bestContour?.confidence ?? 0
   const componentCount = runtime.latestContours?.components.length ?? 0
   const statusText = resolveStatus(success, confidence, componentCount)
@@ -579,6 +587,10 @@ function buildDiagnostics({
       activeRatio,
       edgeRatio,
     })
+  } else if (monoStep?.functionId === 'max_channel' && !monoStep.locked) {
+    primaryIssue = 'Wrong grayscale feed.'
+    nextAction = 'Switch the mono conversion to to_grayscale or extract_luma.'
+    breakingStepId = monoStep.id
   } else if (!maskStep?.functionId) {
     primaryIssue = 'Mask operation missing.'
     nextAction = 'Assign a threshold function to mask = ... before tracing contours.'
@@ -930,7 +942,9 @@ function buildEdgeMask(
         bottom * 2 +
         bottomRight
 
-      const magnitude = Math.min(255, Math.hypot(gradientX, gradientY) / 4)
+      // Lesson sensitivities use the Sobel response scale; dividing by four
+      // makes the locked edge stages reject even the canonical target boundary.
+      const magnitude = Math.min(255, Math.hypot(gradientX, gradientY))
 
       if (magnitude >= sensitivity) {
         edgeMask[index] = 1

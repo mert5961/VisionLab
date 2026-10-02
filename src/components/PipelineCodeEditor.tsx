@@ -241,6 +241,7 @@ function PipelineCodeLine({
         <span className="code-token code-token--var">{step.outputVar}</span>
         <span className="code-token code-token--op"> = </span>
         <select
+          aria-label={`Operation for ${step.outputVar}`}
           className={`code-token code-token--fn code-select ${step.functionId ? '' : 'code-select--missing'}`}
           value={step.functionId ?? ''}
           onChange={(event) =>

@@ -914,3 +914,124 @@ body {
   background: rgba(255, 190, 98, 0.12);
   color: #fff1d0;
 }
+
+/* Keep the complete source and target visible at any panel aspect ratio. */
+.screen__canvas {
+  object-fit: contain;
+}
+
+.pipeline-stage {
+  height: 100%;
+}
+
+:where(button, select, input, summary, a):focus-visible {
+  outline: 2px solid #6be2ff;
+  outline-offset: 3px;
+}
+
+@media (max-width: 1000px) {
+  .app-shell {
+    overflow-y: auto;
+  }
+
+  .operator-screen,
+  .mission-screen {
+    height: auto;
+    min-height: 100%;
+    padding: 12px;
+  }
+
+  .operator-screen,
+  .operator-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    overflow: visible;
+  }
+
+  .operator-bar {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .operator-bar__feedback {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    white-space: normal;
+  }
+
+  .operator-bar__meta {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  .operator-visual,
+  .operator-pipeline,
+  .pipeline-stage {
+    height: auto;
+    min-width: 0;
+  }
+
+  .operator-visual__grid {
+    grid-template-rows: auto auto;
+  }
+
+  .screen__canvas-frame {
+    aspect-ratio: 4 / 3;
+    height: auto;
+  }
+
+  .operator-visual__overlay .screen__canvas-frame {
+    max-height: 260px;
+    aspect-ratio: auto;
+    height: 260px;
+  }
+
+  .pipeline-stage {
+    grid-template-rows: auto;
+    padding: 12px;
+  }
+
+  .pipeline-stack {
+    overflow: visible;
+  }
+
+  .mission-screen__frame {
+    height: auto;
+    padding: 18px;
+  }
+
+  .analysis-sheet {
+    position: fixed;
+  }
+}
+
+@media (max-width: 520px) {
+  .operator-bar,
+  .operator-visual__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .operator-bar__feedback {
+    grid-row: auto;
+  }
+
+  .operator-visual__header,
+  .mission-screen__brief {
+    flex-wrap: wrap;
+  }
+
+  .operator-visual__status {
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell--glitch,
+  .app-shell--dissolve {
+    animation: none;
+  }
+
+  .analysis-sheet {
+    transition: none;
+  }
+}
